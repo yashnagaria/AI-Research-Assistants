@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+openai
+python-dotenv
+faiss-cpu
+numpy
+pdfplumber
+python-docx
+beautifulsoup4
+pydantic
+langraph
