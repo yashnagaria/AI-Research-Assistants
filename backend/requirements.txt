@@ -1,5 +1,6 @@
 fastapi
 uvicorn[standard]
+python-multipart
 openai
 python-dotenv
 faiss-cpu
@@ -7,5 +8,6 @@ numpy
 pdfplumber
 python-docx
 beautifulsoup4
+lxml
 pydantic
-langraph
+langgraph

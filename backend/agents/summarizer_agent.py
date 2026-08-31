@@ -2,14 +2,14 @@
 Summarizer Agent: Summarizes retrieved chunks into a coherent answer
 """
 import os
-from openai import OpenAI
+from llm_client import get_client
 from utils.logger import agent_logger
 
 
 class SummarizerAgent:
     def __init__(self):
         self.name = "Summarizer Agent"
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.client = get_client()
         agent_logger.info(f"{self.name} initialized")
 
     def summarize(self, query: str, chunks: list[str], conversation_context: str = ""):
@@ -74,7 +74,7 @@ WARNING: If you add information not in the context, the answer is WRONG.
 Your answer (strictly from context only):"""
 
         try:
-            model = os.getenv("LLM_MODEL", "gpt-4")
+            model = os.getenv("LLM_MODEL", "gemini-3.6-flash")
             agent_logger.info(f"{self.name}: 🤖 Invoking LLM - Model: {model}, Temperature: 0.2")
 
             response = self.client.chat.completions.create(

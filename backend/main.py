@@ -7,7 +7,7 @@ from db.faiss_store import save_faiss_index, load_faiss_index, get_documents
 from db.multi_doc_store import multi_doc_store
 from db.sqlite_memory import conversation_memory
 from models.schemas import AskRequest, SessionCreateResponse, SessionHistoryResponse
-from openai import OpenAI
+from llm_client import get_client
 import faiss
 import numpy as np
 import tempfile
@@ -25,7 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = get_client()
 orchestrator = Orchestrator()
 
 @app.get("/health")
@@ -281,7 +281,7 @@ async def ask(req: AskRequest):
     context = "\n\n".join(retrieved)
 
     prompt = f"Answer using context below:\n{context}\n\nQuestion: {req.query}"
-    model = os.getenv("LLM_MODEL", "gpt-4")
+    model = os.getenv("LLM_MODEL", "gemini-3.6-flash")
     api_logger.info(f"🤖 Invoking LLM - Model: {model}")
 
     response = client.chat.completions.create(
@@ -509,17 +509,26 @@ def get_database_stats():
     # Conversation stats
     conversation_stats = conversation_memory.get_stats()
 
-    # FAISS stats
+    # Legacy single-index FAISS stats (populated by /upload)
     index, metadata, documents = load_faiss_index()
-    faiss_stats = {
+    legacy_stats = {
         "total_vectors": index.ntotal if index else 0,
         "total_documents": len(documents),
         "total_chunks": len(metadata)
     }
 
+    # Multi-doc store stats (populated by /upload-v2, which the UI uses)
+    multi_doc_stats = multi_doc_store.get_all_stats()
+
     stats = {
         "conversations": conversation_stats,
-        "documents": faiss_stats
+        "documents": {
+            "total_vectors": legacy_stats["total_vectors"] + multi_doc_stats["total_vectors"],
+            "total_documents": legacy_stats["total_documents"] + multi_doc_stats["total_documents"],
+            "total_chunks": legacy_stats["total_chunks"] + multi_doc_stats["total_chunks"]
+        },
+        "legacy_index": legacy_stats,
+        "multi_doc_store": multi_doc_stats
     }
 
     api_logger.info(f"Database stats retrieved: {stats}")

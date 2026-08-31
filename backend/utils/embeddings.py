@@ -1,13 +1,17 @@
 import os
-from openai import OpenAI
+
+from llm_client import get_client
 from utils.logger import api_logger
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = get_client()
 
-def get_embedding(text: str, model="text-embedding-3-small"):
+def get_embedding(text: str, model: str = None):
     """
-    Get embedding vector for text using OpenAI
+    Get embedding vector for text using the configured provider
     """
+    if model is None:
+        model = os.getenv("EMBEDDING_MODEL", "gemini-embedding-001")
+
     api_logger.debug(f"🔢 Generating embedding - Model: {model}, Text length: {len(text)} chars")
 
     response = client.embeddings.create(
@@ -15,18 +19,19 @@ def get_embedding(text: str, model="text-embedding-3-small"):
         model=model
     )
 
-    # Log token usage
-    usage = response.usage
-    api_logger.debug(f"✅ Embedding generated | Tokens: {usage.total_tokens}")
+    # Not every provider reports usage on embeddings (Gemini returns none)
+    usage = getattr(response, "usage", None)
+    if usage is not None:
+        api_logger.debug(f"✅ Embedding generated | Tokens: {usage.total_tokens}")
 
     return response.data[0].embedding
 
 def call_openai(prompt: str, model: str = None):
     """
-    Generic OpenAI API call wrapper for agents
+    Generic chat completion wrapper for agents
     """
     if model is None:
-        model = os.getenv("LLM_MODEL", "gpt-4")
+        model = os.getenv("LLM_MODEL", "gemini-3.6-flash")
 
     response = client.chat.completions.create(
         model=model,

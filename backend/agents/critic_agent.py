@@ -2,14 +2,14 @@
 Critic Agent: Evaluates the summary and identifies missing information or areas for improvement
 """
 import os
-from openai import OpenAI
+from llm_client import get_client
 from utils.logger import agent_logger
 
 
 class CriticAgent:
     def __init__(self):
         self.name = "Critic Agent"
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.client = get_client()
         agent_logger.info(f"{self.name} initialized")
 
     def critique(self, query: str, summary: str, chunks: list[str]):
@@ -69,7 +69,7 @@ GAPS: [Hallucinations OR missing context info]
 SUGGESTIONS: [Stick to context OR add missing context info]"""
 
         try:
-            model = os.getenv("LLM_MODEL", "gpt-4")
+            model = os.getenv("LLM_MODEL", "gemini-3.6-flash")
             agent_logger.info(f"{self.name}: 🤖 Invoking LLM - Model: {model}, Temperature: 0.4")
 
             response = self.client.chat.completions.create(

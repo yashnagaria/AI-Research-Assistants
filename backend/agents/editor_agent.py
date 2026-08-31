@@ -2,14 +2,14 @@
 Editor Agent: Refines and polishes the final answer based on critic feedback
 """
 import os
-from openai import OpenAI
+from llm_client import get_client
 from utils.logger import agent_logger
 
 
 class EditorAgent:
     def __init__(self):
         self.name = "Editor Agent"
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.client = get_client()
         agent_logger.info(f"{self.name} initialized")
 
     def edit(self, query: str, summary: str, critique: str, chunks: list[str]):
@@ -74,7 +74,7 @@ If the context doesn't contain enough information to fully answer the question, 
 Provide the corrected final answer (strictly from context):"""
 
         try:
-            model = os.getenv("LLM_MODEL", "gpt-4")
+            model = os.getenv("LLM_MODEL", "gemini-3.6-flash")
             agent_logger.info(f"{self.name}: 🤖 Invoking LLM - Model: {model}, Temperature: 0.3")
 
             response = self.client.chat.completions.create(

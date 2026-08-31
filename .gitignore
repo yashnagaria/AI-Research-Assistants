@@ -109,6 +109,7 @@ backend/tmp/
 # IDE configs
 .vscode/
 .idea/
+.claude/settings.local.json
 *.iml
 *.iws
 *.ipr
@@ -161,6 +162,7 @@ pdfs/
 *.pdf
 *.docx
 *.txt
+!backend/requirements.txt
 
 # Local test scripts or sandbox
 sandbox/
