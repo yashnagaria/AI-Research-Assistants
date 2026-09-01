@@ -142,7 +142,7 @@ The backend talks to any **OpenAI-compatible** endpoint through `backend/llm_cli
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/yashnagaria/AI-Research-Assistant.git
+git clone https://github.com/yashnagaria/AI-Research-Assistants.git
 cd AI-Research-Assistant
 ```
 
