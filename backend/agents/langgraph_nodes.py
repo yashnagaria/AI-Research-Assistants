@@ -40,7 +40,8 @@ def research_node(state: AgentState) -> AgentState:
         result = research_agent.search_multi_doc(
             query=state["query"],
             doc_ids=state.get("doc_ids"),
-            top_k=state.get("top_k", 5)
+            top_k=state.get("top_k", 5),
+            store=state.get("doc_store")
         )
 
         if result["status"] == "error":

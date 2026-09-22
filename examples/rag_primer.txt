@@ -1,0 +1,48 @@
+Retrieval-Augmented Generation: A Short Primer
+
+1. What RAG is
+
+Retrieval-Augmented Generation (RAG) is a technique that gives a large language model access to external documents at answer time. Instead of relying only on what the model memorized during training, a RAG system first retrieves passages relevant to the user's question and then asks the model to answer using those passages as context. The term was introduced in 2020 by Patrick Lewis and colleagues at Facebook AI Research in the paper "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks".
+
+RAG is popular because it lets an organization answer questions over private or frequently changing documents without retraining a model. Updating the knowledge base is as simple as adding or removing documents from the index.
+
+2. The pipeline
+
+A typical RAG pipeline has two phases.
+
+Indexing (offline):
+- Parse source documents (PDF, Word, HTML, plain text) into raw text.
+- Split the text into chunks, often a few hundred characters or tokens each, with some overlap between neighbouring chunks so that sentences cut at a boundary are not lost.
+- Convert every chunk into a dense vector using an embedding model.
+- Store the vectors in a vector index.
+
+Querying (online):
+- Embed the user's question with the same embedding model.
+- Retrieve the top-k chunks whose vectors are closest to the question vector.
+- Insert those chunks into a prompt and ask the language model to answer from them.
+
+3. Vector search and FAISS
+
+FAISS (Facebook AI Similarity Search) is an open-source library for efficient similarity search over dense vectors, released by Facebook AI Research in 2017. Its simplest index, IndexFlatL2, compares the query against every stored vector using Euclidean (L2) distance. This exact search is fast enough for thousands to low millions of vectors. For larger collections FAISS offers approximate indexes such as IVF and HNSW that trade a little accuracy for much higher speed.
+
+An important constraint: every vector in an index must have the same dimension. If you switch to an embedding model with a different output size, the existing index must be rebuilt.
+
+4. Chunking trade-offs
+
+Chunk size is one of the most influential settings in a RAG system. Small chunks are precise but may lose surrounding context, so an answer that spans two chunks can be missed. Large chunks keep more context but dilute the embedding with unrelated content and consume more of the model's context window. Overlap between chunks reduces the risk of splitting a key sentence in half.
+
+5. Common failure modes
+
+- Retrieval misses: the right passage exists but is not in the top-k results, often because the question uses different vocabulary than the document.
+- Hallucination: the model adds facts that are not in the retrieved context, usually from its general training knowledge.
+- Lost context: an answer requires information spread across several chunks, and only some of them are retrieved.
+- Stale or conflicting sources: two documents disagree and the model silently picks one.
+- Follow-up confusion: a question such as "what about the second one?" cannot be answered without the previous conversation turns.
+
+6. Mitigations
+
+Grounding instructions in the prompt ("answer only from the context, otherwise say the information is not found") reduce hallucination. A second model pass that critiques the draft answer against the retrieved context, and a rewrite step that removes unsupported claims, reduce it further. Passing recent conversation history to the model resolves follow-up questions. Showing the user which sources were used makes answers verifiable.
+
+7. Evaluating a RAG system
+
+Commonly used quality measures include faithfulness (is every claim supported by the retrieved context?), answer relevance (does the answer address the question?), context precision (how many retrieved chunks were actually useful?) and context recall (was all the necessary information retrieved?).

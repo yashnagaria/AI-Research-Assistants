@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Reading notes: Attention Is All You Need</title>
+  <style>body { font-family: sans-serif; max-width: 720px; margin: auto; }</style>
+  <script>console.log("scripts are stripped by the parser");</script>
+</head>
+<body>
+  <h1>Reading notes: "Attention Is All You Need" (Vaswani et al., 2017)</h1>
+
+  <h2>Summary</h2>
+  <p>The paper introduced the Transformer, a sequence-to-sequence model built entirely on attention mechanisms,
+  with no recurrence and no convolutions. It was written by researchers at Google Brain and Google Research and
+  presented at NeurIPS 2017. Removing recurrence lets the model process all positions of a sequence in parallel,
+  which made training much faster than the recurrent models that were state of the art at the time.</p>
+
+  <h2>Architecture of the base model</h2>
+  <ul>
+    <li>An encoder stack of 6 identical layers and a decoder stack of 6 identical layers.</li>
+    <li>Each encoder layer has two sub-layers: multi-head self-attention and a position-wise feed-forward network.</li>
+    <li>Each decoder layer adds a third sub-layer that performs multi-head attention over the encoder output.
+        Decoder self-attention is masked so a position cannot attend to later positions.</li>
+    <li>Every sub-layer is wrapped in a residual connection followed by layer normalization.</li>
+    <li>Model dimension d_model = 512, feed-forward inner dimension d_ff = 2048, and 8 attention heads.</li>
+    <li>Because there is no recurrence, sinusoidal positional encodings are added to the input embeddings
+        to give the model information about token order.</li>
+  </ul>
+
+  <h2>Scaled dot-product attention</h2>
+  <p>Attention is computed as softmax(QK^T / sqrt(d_k)) V, where Q, K and V are the query, key and value matrices.
+  The scaling by the square root of the key dimension d_k keeps the dot products from growing so large that the
+  softmax saturates. Multi-head attention runs several attention functions in parallel on different learned
+  projections and concatenates the results, letting the model attend to information from different
+  representation subspaces.</p>
+
+  <h2>Training setup</h2>
+  <p>The models were trained on one machine with 8 NVIDIA P100 GPUs. The base model trained for 100,000 steps,
+  about 12 hours. The big model trained for 300,000 steps, about 3.5 days. Training used the Adam optimizer with
+  a learning-rate schedule that warms up linearly for 4,000 steps and then decays, plus dropout and label
+  smoothing for regularization.</p>
+
+  <h2>Results</h2>
+  <table>
+    <tr><th>Task</th><th>Model</th><th>BLEU</th></tr>
+    <tr><td>WMT 2014 English-to-German</td><td>Transformer (big)</td><td>28.4</td></tr>
+    <tr><td>WMT 2014 English-to-French</td><td>Transformer (big)</td><td>41.8</td></tr>
+  </table>
+  <p>Both scores were new state-of-the-art results for single models, reached at a fraction of the training cost
+  of earlier approaches. The authors also showed the Transformer generalizes to English constituency parsing.</p>
+
+  <h2>Why it matters</h2>
+  <p>The Transformer became the foundation of later language models such as BERT and the GPT series, and of
+  the embedding models used for semantic search in retrieval systems.</p>
+</body>
+</html>

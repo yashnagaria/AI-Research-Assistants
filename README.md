@@ -92,6 +92,12 @@ AI-Research-Assistant/
 │   ├── tailwind.config.js
 │   └── tsconfig.json
 │
+├── examples/                          # Sample documents for demos
+├── .streamlit/                        # Streamlit theme + secrets template
+├── streamlit_app.py                   # Streamlit UI (runs the agents in-process)
+├── requirements.txt                   # Dependencies for the Streamlit app
+├── interview.md                       # Project story & interview prep
+│
 ├── venv/                              # Python virtual environment
 │
 ├── .env                               # Environment variables (gitignored)
@@ -198,6 +204,59 @@ Visit:
 - Frontend: http://localhost:3000
 - Backend: http://localhost:8000
 - API docs: http://localhost:8000/docs
+
+---
+
+## 🎈 Run with Streamlit (one command, or one-click deploy)
+
+`streamlit_app.py` runs the same LangGraph agent pipeline in-process, so you need no separate backend server and no Node.js.
+
+### Locally
+
+```bash
+pip install -r requirements.txt
+streamlit run streamlit_app.py
+```
+
+The app reads your key from `.env` (same as the backend), from `.streamlit/secrets.toml`, or from a key you paste into the sidebar.
+
+### Deploy from GitHub to Streamlit Community Cloud
+
+1. Push this repo to GitHub.
+2. Go to [share.streamlit.io](https://share.streamlit.io), click **Create app**, and pick this repo, branch `main`, and main file `streamlit_app.py`.
+3. Under **Advanced settings**, choose **Python 3.11** and paste your secrets (template in `.streamlit/secrets.toml.example`):
+   ```toml
+   OPENAI_API_KEY = "your_gemini_api_key_here"
+   OPENAI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+   LLM_MODEL = "gemini-3.5-flash-lite"
+   EMBEDDING_MODEL = "gemini-embedding-001"
+   ```
+4. Deploy. If you skip the secrets, each visitor is asked for their own Gemini key instead.
+
+Each browser session gets its **own temporary document store**, so visitors never see each other's uploads. Documents are lost when the session ends or the app restarts.
+
+### Try it with the sample documents
+
+Click **Load sample documents** in the sidebar to index three files from [`examples/`](examples/):
+
+| File | What it shows |
+|---|---|
+| `rag_primer.txt` | A factual primer on RAG, FAISS and chunking |
+| `transformer_notes.html` | Reading notes on *Attention Is All You Need*; exercises the HTML parser |
+| `brightline_remote_work_policy.txt` | A **fictional** company policy full of exact numbers, good for precise Q&A |
+
+Then try these questions:
+
+| Question | What to look for |
+|---|---|
+| *How many days a week can Brightline employees work remotely, and what are the core hours?* | A short factual answer pulled from the policy |
+| *What is the home-office equipment stipend?* followed by *Does it renew every year?* | The follow-up only works because the conversation history is passed to the agents |
+| *Summarize the architecture of the base Transformer model.* | A longer answer. Open **How the agents worked** to see whether the Critic found gaps and the Editor rewrote the draft |
+| *What BLEU score did the big Transformer reach on English-to-German?* | A specific figure (28.4) read from an HTML table |
+| *What are the main failure modes of a RAG system?* | A multi-point summary from the primer |
+| *What is Brightline's policy on bringing pets to the office?* | **Not in any document.** The assistant should say so instead of inventing a policy |
+
+Use the **Search only these** selector to restrict a question to specific documents.
 
 ---
 

@@ -1,0 +1,39 @@
+Brightline Analytics - Remote and Hybrid Work Policy
+(Fictional sample document for demonstrating the AI Research Assistant.)
+
+Policy owner: People Operations
+Effective date: 1 March 2025
+Applies to: all full-time and part-time employees after completing their first 30 days
+
+1. Hybrid schedule
+
+Employees may work remotely up to 3 days per week. The remaining 2 days are spent in the office, and Tuesday is a required in-office day for every team so that planning meetings happen in person. Teams choose their second office day together and record it in the team calendar.
+
+Core collaboration hours are 10:00 to 15:00 in the employee's local time zone. During core hours employees are expected to be reachable on chat and available for meetings. Outside core hours, schedules are flexible as long as the employee's weekly commitments are met.
+
+2. Fully remote arrangements
+
+Fully remote work (5 days per week) requires written approval from both the employee's manager and the People Operations team. Approvals are reviewed every 12 months. Fully remote employees must travel to the office at least once per quarter for team planning; Brightline pays for this travel.
+
+3. Home-office equipment
+
+Each employee receives a one-time home-office stipend of 600 USD to buy a desk, chair, monitor or similar equipment. The stipend does not renew annually. Employees who have been with Brightline for 3 years may request a second stipend of 300 USD for replacements.
+
+Brightline provides a company laptop to every employee. Laptops are replaced every 4 years or sooner if they fail.
+
+In addition, employees receive an internet allowance of 40 USD per month, paid with regular salary.
+
+4. Working from another country
+
+Employees may work from outside their country of employment for up to 20 working days per calendar year. Longer stays require approval from the Legal team because of tax and immigration rules.
+
+5. Security requirements
+
+- Company work must be done on company-managed devices only.
+- Public Wi-Fi may be used only with the company VPN switched on.
+- Laptops must be locked whenever they are left unattended.
+- Printed confidential documents must be shredded, never thrown away in household waste.
+
+6. Requesting changes
+
+Requests to change a hybrid schedule or to move to a fully remote arrangement are submitted through the People Operations portal. The manager responds within 10 working days.

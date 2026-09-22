@@ -4,7 +4,7 @@ Research Agent: Retrieves relevant chunks from FAISS based on user query
 import numpy as np
 from typing import List, Optional
 from db.faiss_store import load_faiss_index
-from db.multi_doc_store import multi_doc_store
+from db.multi_doc_store import MultiDocumentStore, multi_doc_store
 from utils.embeddings import get_embedding
 from utils.logger import agent_logger
 
@@ -76,7 +76,13 @@ class ResearchAgent:
             "num_results": len(retrieved_chunks)
         }
 
-    def search_multi_doc(self, query: str, doc_ids: Optional[List[str]] = None, top_k: int = 5):
+    def search_multi_doc(
+        self,
+        query: str,
+        doc_ids: Optional[List[str]] = None,
+        top_k: int = 5,
+        store: Optional[MultiDocumentStore] = None
+    ):
         """
         Search across selected documents using multi-doc store (Phase 5)
 
@@ -84,17 +90,22 @@ class ResearchAgent:
             query: User's question
             doc_ids: List of document IDs to search (None or empty = all docs)
             top_k: Number of results to return
+            store: Document store to search (defaults to the shared global store;
+                   the Streamlit app passes a per-session store)
 
         Returns:
             dict with retrieved chunks and metadata
         """
+        if store is None:
+            store = multi_doc_store
+
         agent_logger.info(
             f"{self.name}: Multi-doc search for query='{query}', "
             f"doc_ids={doc_ids if doc_ids else 'ALL'}, top_k={top_k}"
         )
 
         # Check if any documents exist
-        all_docs = multi_doc_store.list_documents()
+        all_docs = store.list_documents()
         if not all_docs:
             agent_logger.error(f"{self.name}: No documents in multi-doc store")
             return {
@@ -131,7 +142,7 @@ class ResearchAgent:
 
         # Search selected documents
         agent_logger.debug(f"{self.name}: Searching {len(doc_ids)} document(s)")
-        chunks, sources, distances = multi_doc_store.search_documents(
+        chunks, sources, distances = store.search_documents(
             doc_ids=doc_ids,
             query_vector=q_vec,
             top_k=top_k

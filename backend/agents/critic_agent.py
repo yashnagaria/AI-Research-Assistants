@@ -96,7 +96,12 @@ SUGGESTIONS: [Stick to context OR add missing context info]"""
                 suggestions_text = critique.split("SUGGESTIONS:")[-1].strip()
                 suggestions = [s.strip() for s in suggestions_text.split("\n") if s.strip() and not s.startswith("STRENGTHS") and not s.startswith("GAPS")]
 
-            has_gaps = "GAPS:" in critique and len(critique.split("GAPS:")[-1].strip()) > 10
+            # Look only at the GAPS section; "GAPS: None. SUGGESTIONS: None." means no gaps
+            gaps_text = ""
+            if "GAPS:" in critique:
+                gaps_text = critique.split("GAPS:", 1)[1].split("SUGGESTIONS:")[0]
+            gaps_text = gaps_text.strip(" \n.*-_:").lower()
+            has_gaps = bool(gaps_text) and not gaps_text.startswith("none")
             agent_logger.info(f"{self.name}: Critique analysis - has_gaps={has_gaps}, {len(suggestions)} suggestions")
 
             return {

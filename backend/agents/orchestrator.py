@@ -108,7 +108,8 @@ class Orchestrator:
         query: str,
         doc_ids: Optional[List[str]] = None,
         top_k: int = 5,
-        conversation_context: str = ""
+        conversation_context: str = "",
+        doc_store=None
     ):
         """
         Phase 5: Process query using multi-document store with context switching
@@ -118,6 +119,7 @@ class Orchestrator:
             doc_ids: List of document IDs to search (None = all docs)
             top_k: Number of chunks to retrieve
             conversation_context: Previous conversation history
+            doc_store: MultiDocumentStore to search (None = shared global store)
 
         Returns:
             dict containing final answer and workflow metadata
@@ -131,6 +133,7 @@ class Orchestrator:
             "source": None,  # Not used in multi-doc mode
             "doc_ids": doc_ids,  # Phase 5: Document selection
             "use_multi_doc": True,  # Flag for multi-doc mode
+            "doc_store": doc_store,
             "conversation_context": conversation_context,
 
             # Outputs (will be populated by agents)
@@ -174,6 +177,8 @@ class Orchestrator:
             return {
                 "status": "success",
                 "answer": final_state["final_answer"],
+                "initial_summary": final_state.get("initial_summary", ""),
+                "critique": final_state.get("critique", ""),
                 "sources": final_state.get("sources", []),
                 "searched_docs": final_state.get("searched_docs", []),
                 "workflow_log": final_state.get("workflow_log", []),

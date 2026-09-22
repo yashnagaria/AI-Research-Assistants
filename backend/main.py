@@ -2,7 +2,7 @@ import os
 from config import OPENAI_API_KEY
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from utils.document_parser import extract_text_from_file, chunk_text, SUPPORTED_EXTENSIONS
-from utils.embeddings import get_embedding
+from utils.embeddings import get_embedding, get_embeddings
 from db.faiss_store import save_faiss_index, load_faiss_index, get_documents
 from db.multi_doc_store import multi_doc_store
 from db.sqlite_memory import conversation_memory
@@ -97,7 +97,7 @@ async def upload_file(file: UploadFile = File(...), source: str = Form("document
 
         # Generate embeddings
         api_logger.info(f"🔢 Generating embeddings for {len(chunks)} chunks")
-        vectors = [get_embedding(c) for c in chunks]
+        vectors = get_embeddings(chunks)
         dim = len(vectors[0])
         api_logger.info(f"✅ All embeddings generated | Dimension: {dim}, Total vectors: {len(vectors)}")
 
@@ -189,7 +189,7 @@ async def upload_file_v2(file: UploadFile = File(...)):
 
         # Generate embeddings
         api_logger.info(f"🔢 Generating embeddings for {len(chunks)} chunks")
-        vectors = [get_embedding(c) for c in chunks]
+        vectors = get_embeddings(chunks)
         dim = len(vectors[0])
         api_logger.info(f"✅ Embeddings generated | Dimension: {dim}")
 

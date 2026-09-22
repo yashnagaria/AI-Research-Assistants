@@ -1,7 +1,7 @@
 """
 LangGraph State Definition for Multi-Agent Workflow
 """
-from typing import TypedDict, List, Optional
+from typing import Any, TypedDict, List, Optional
 
 
 class AgentState(TypedDict):
@@ -18,6 +18,7 @@ class AgentState(TypedDict):
     source: Optional[str]               # Document source filter (legacy)
     doc_ids: Optional[List[str]]        # Phase 5: Document IDs to search
     use_multi_doc: bool                 # Phase 5: Use multi-doc store
+    doc_store: Optional[Any]            # MultiDocumentStore to search (None = shared global store)
     conversation_context: str           # Previous conversation history
 
     # Research Agent Output

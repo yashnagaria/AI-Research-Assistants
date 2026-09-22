@@ -163,6 +163,11 @@ pdfs/
 *.docx
 *.txt
 !backend/requirements.txt
+!requirements.txt
+!examples/*.txt
+
+# Streamlit secrets (the .example template is committed)
+.streamlit/secrets.toml
 
 # Local test scripts or sandbox
 sandbox/
