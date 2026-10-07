@@ -292,6 +292,29 @@ class SQLiteConversationMemory:
         db_logger.debug(f"Retrieved {len(sessions)} active sessions")
         return sessions
 
+    def get_recent_sessions(self, limit: int = 5) -> List[Dict]:
+        """Return recent sessions with a human-readable title from the first user turn."""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT s.session_id, s.created_at, s.last_updated, s.message_count,
+                   COALESCE((
+                       SELECT m.content FROM messages m
+                       WHERE m.session_id = s.session_id AND m.role = 'user'
+                       ORDER BY m.id ASC LIMIT 1
+                   ), 'New conversation') AS title
+            FROM sessions s
+            WHERE s.message_count > 0
+            ORDER BY s.last_updated DESC
+            LIMIT ?
+        """, (max(1, min(limit, 20)),))
+        sessions = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        for session in sessions:
+            title = session["title"].strip().replace("\n", " ")
+            session["title"] = title[:72] + ("..." if len(title) > 72 else "")
+        return sessions
+
     def get_session_metadata(self, session_id: str) -> Optional[Dict]:
         """
         Get metadata for a session

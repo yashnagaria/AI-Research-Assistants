@@ -10,6 +10,7 @@ A private, API-key-free research workspace that combines uploaded documents with
 - **Local by design:** no provider account, API key, or document upload to a model vendor.
 - **Per-document isolation:** select exactly which indexes participate in retrieval.
 - **Visible agent trace:** the frontend exposes workflow stages for an interviewer demo.
+- **Persistent recent chats:** SQLite stores every turn and the UI can reopen the latest five conversations after a restart.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for components, data flow, design decisions, and trade-offs.
 
@@ -19,7 +20,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for components, data flow, design decisio
 - Node.js 20+
 - [Ollama](https://ollama.com/) installed locally
 
-## Run locally
+## First-time setup
 
 ```powershell
 ollama pull qwen2.5:3b
@@ -27,25 +28,66 @@ ollama pull nomic-embed-text
 ollama serve
 ```
 
-In another terminal:
+From the project root, prepare the backend:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r backend\requirements.txt
 Copy-Item .env.example .env
-uvicorn main:app --app-dir backend --reload
 ```
 
-In a third terminal:
+Prepare the frontend:
 
 ```powershell
 cd frontend
 npm install
+```
+
+## Run the application
+
+Use three PowerShell terminals. If the Ollama desktop application is already running, skip `ollama serve`; the port `11434` message simply means Ollama is already available.
+
+Terminal 1 — Ollama:
+
+```powershell
+ollama serve
+```
+
+Terminal 2 — FastAPI, from the project root:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+uvicorn main:app --app-dir backend --reload
+```
+
+Terminal 3 — Next.js:
+
+```powershell
+cd frontend
 npm run dev
 ```
 
 Open `http://localhost:3000`. After both Ollama models are pulled, document-only mode can run offline. Web and hybrid modes naturally require internet access.
+
+Useful checks:
+
+```powershell
+ollama list
+Invoke-RestMethod http://localhost:11434/api/tags
+Invoke-RestMethod http://localhost:8000/health
+```
+
+If PowerShell blocks virtual-environment activation:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\venv\Scripts\Activate.ps1
+```
+
+## Conversation history
+
+Each user and assistant message is written to local SQLite storage. The left sidebar shows the five most recently updated conversations; selecting one restores its messages and web citations. **New chat** starts a separate session. History never leaves the machine and generated database files are excluded from Git.
 
 ## Demo flow
 
@@ -60,7 +102,8 @@ Open `http://localhost:3000`. After both Ollama models are pulled, document-only
 - `POST /upload-v2` — parse and create an isolated FAISS index
 - `POST /ask-v2` — run `documents`, `web`, or `hybrid` agent research
 - `GET /documents` — list indexed documents
-- `POST /sessions/create`, `GET /sessions/{id}/history` — SQLite memory
+- `GET /sessions?limit=5` — recent sessions with titles and timestamps
+- `POST /sessions/create`, `GET /sessions/{id}/history` — SQLite conversation memory
 - `GET /workflow/diagram` — Mermaid representation of the LangGraph
 
 ## Configuration

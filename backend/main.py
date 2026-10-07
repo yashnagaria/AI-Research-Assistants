@@ -484,10 +484,10 @@ def clear_session(session_id: str):
 
 
 @app.get("/sessions")
-def list_sessions():
-    """Get list of all active sessions"""
-    api_logger.info("Fetching all sessions")
-    sessions = conversation_memory.get_all_sessions()
+def list_sessions(limit: int = 5):
+    """Get the most recently updated conversation sessions."""
+    api_logger.info("Fetching recent sessions")
+    sessions = conversation_memory.get_recent_sessions(limit=limit)
     api_logger.info(f"Retrieved {len(sessions)} active sessions")
     return {"sessions": sessions, "count": len(sessions)}
 

@@ -92,6 +92,7 @@ backend/db/*.json
 backend/db/conversations.db
 backend/db/conversations.db-journal
 backend/db/documents/
+db/
 
 # Redis dumps (if persisted locally)
 dump.rdb
