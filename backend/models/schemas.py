@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Literal
 
 class AskRequest(BaseModel):
     query: str
@@ -7,6 +7,7 @@ class AskRequest(BaseModel):
     source: Optional[str] = None  # Filter by document source (legacy)
     doc_ids: Optional[List[str]] = None  # Phase 5: List of document IDs to search
     session_id: Optional[str] = None  # Session ID for conversation memory
+    research_mode: Literal["documents", "web", "hybrid"] = "documents"
 
 class SessionCreateResponse(BaseModel):
     session_id: str

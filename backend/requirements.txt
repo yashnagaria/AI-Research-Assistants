@@ -1,8 +1,9 @@
 fastapi
 uvicorn[standard]
 python-multipart
-openai
 python-dotenv
+requests
+ddgs
 faiss-cpu
 numpy
 pdfplumber

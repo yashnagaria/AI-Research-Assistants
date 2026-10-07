@@ -109,7 +109,8 @@ class Orchestrator:
         doc_ids: Optional[List[str]] = None,
         top_k: int = 5,
         conversation_context: str = "",
-        doc_store=None
+        doc_store=None,
+        research_mode: str = "documents",
     ):
         """
         Phase 5: Process query using multi-document store with context switching
@@ -135,6 +136,7 @@ class Orchestrator:
             "use_multi_doc": True,  # Flag for multi-doc mode
             "doc_store": doc_store,
             "conversation_context": conversation_context,
+            "research_mode": research_mode,
 
             # Outputs (will be populated by agents)
             "chunks": [],
@@ -147,6 +149,7 @@ class Orchestrator:
             "final_answer": "",
             "editing_applied": False,
             "searched_docs": [],  # Track which docs were searched
+            "web_sources": [],
 
             # Metadata
             "workflow_log": [],
@@ -180,6 +183,7 @@ class Orchestrator:
                 "initial_summary": final_state.get("initial_summary", ""),
                 "critique": final_state.get("critique", ""),
                 "sources": final_state.get("sources", []),
+                "web_sources": final_state.get("web_sources", []),
                 "searched_docs": final_state.get("searched_docs", []),
                 "workflow_log": final_state.get("workflow_log", []),
                 "metadata": {

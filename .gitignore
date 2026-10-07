@@ -17,6 +17,7 @@ ehthumbs_vista.db
 
 # Python virtual environments
 venv/
+.venv/
 *.pyc
 __pycache__/
 *.pyo

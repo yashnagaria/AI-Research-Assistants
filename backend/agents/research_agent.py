@@ -7,6 +7,7 @@ from db.faiss_store import load_faiss_index
 from db.multi_doc_store import MultiDocumentStore, multi_doc_store
 from utils.embeddings import get_embedding
 from utils.logger import agent_logger
+from services.web_search import search_web
 
 
 class ResearchAgent:
@@ -162,3 +163,17 @@ class ResearchAgent:
             "num_results": len(chunks),
             "searched_docs": doc_ids
         }
+
+    def search_web(self, query: str, top_k: int = 5):
+        """Search the public web and turn result snippets into cited evidence."""
+        try:
+            sources = search_web(query, top_k)
+        except Exception as exc:
+            agent_logger.exception("DuckDuckGo search failed")
+            return {"status": "error", "message": f"Web search failed: {exc}", "chunks": [], "sources": []}
+        chunks = [
+            f"[{index}] {source['title']}\n{source['snippet']}\nURL: {source['url']}"
+            for index, source in enumerate(sources, start=1)
+        ]
+        return {"status": "success", "chunks": chunks,
+                "sources": [source["url"] for source in sources], "web_sources": sources}

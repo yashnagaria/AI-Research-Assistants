@@ -1,5 +1,4 @@
 import os
-from config import OPENAI_API_KEY
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from utils.document_parser import extract_text_from_file, chunk_text, SUPPORTED_EXTENSIONS
 from utils.embeddings import get_embedding, get_embeddings
@@ -7,7 +6,7 @@ from db.faiss_store import save_faiss_index, load_faiss_index, get_documents
 from db.multi_doc_store import multi_doc_store
 from db.sqlite_memory import conversation_memory
 from models.schemas import AskRequest, SessionCreateResponse, SessionHistoryResponse
-from llm_client import get_client
+from llm_client import get_client, ollama_client
 import faiss
 import numpy as np
 import tempfile
@@ -25,13 +24,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = get_client()
 orchestrator = Orchestrator()
+client = get_client()
 
 @app.get("/health")
 def health():
     api_logger.info("Health check endpoint called")
-    return {"status": "ok"}
+    ready = ollama_client.is_ready()
+    return {"status": "ok" if ready else "degraded", "ollama": ready,
+            "api_key_required": False}
 
 @app.get("/documents")
 def list_documents():
@@ -331,7 +332,8 @@ async def ask_multi_doc(req: AskRequest):
             query=req.query,
             doc_ids=req.doc_ids,
             top_k=req.top_k,
-            conversation_context=context_history
+            conversation_context=context_history,
+            research_mode=req.research_mode,
         )
 
         if result["status"] == "error":
@@ -348,7 +350,8 @@ async def ask_multi_doc(req: AskRequest):
             metadata={
                 "sources": result.get("sources", []),
                 "workflow_log": result.get("workflow_log", []),
-                "searched_docs": result.get("searched_docs", [])
+                "searched_docs": result.get("searched_docs", []),
+                "web_sources": result.get("web_sources", [])
             }
         )
 
@@ -358,6 +361,7 @@ async def ask_multi_doc(req: AskRequest):
             "workflow_log": result.get("workflow_log", []),
             "metadata": result.get("metadata", {}),
             "searched_docs": result.get("searched_docs", []),
+            "web_sources": result.get("web_sources", []),
             "session_id": session_id
         }
 

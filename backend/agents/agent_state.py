@@ -20,12 +20,14 @@ class AgentState(TypedDict):
     use_multi_doc: bool                 # Phase 5: Use multi-doc store
     doc_store: Optional[Any]            # MultiDocumentStore to search (None = shared global store)
     conversation_context: str           # Previous conversation history
+    research_mode: str                  # documents, web, or hybrid
 
     # Research Agent Output
     chunks: List[str]                   # Retrieved text chunks
     sources: List[str]                  # Source documents for chunks
     num_chunks_found: int               # Number of chunks retrieved
     searched_docs: List[str]            # Phase 5: Documents that were searched
+    web_sources: List[dict]              # Structured DuckDuckGo results
 
     # Summarizer Agent Output
     initial_summary: str                # First draft answer

@@ -30,8 +30,34 @@ def research_node(state: AgentState) -> AgentState:
     # Log progress
     workflow_log = state.get("workflow_log", [])
 
-    # Check if using multi-doc mode (Phase 5)
+    research_mode = state.get("research_mode", "documents")
     use_multi_doc = state.get("use_multi_doc", False)
+
+    if research_mode == "web":
+        workflow_log.append("[1/4] Research Agent: Searching DuckDuckGo...")
+        result = research_agent.search_web(state["query"], state.get("top_k", 5))
+        if result["status"] == "error":
+            return {**state, "status": "error", "error_message": result["message"],
+                    "workflow_log": workflow_log, "chunks": [], "sources": [], "web_sources": []}
+        workflow_log.append(f"[1/4] Complete - Found {len(result['chunks'])} web sources")
+        return {**state, "chunks": result["chunks"], "sources": result["sources"],
+                "web_sources": result["web_sources"], "num_chunks_found": len(result["chunks"]),
+                "workflow_log": workflow_log, "research_complete": True, "status": "research_complete"}
+
+    if research_mode == "hybrid":
+        workflow_log.append("[1/4] Research Agent: Searching documents and DuckDuckGo...")
+        docs = research_agent.search_multi_doc(state["query"], state.get("doc_ids"),
+                                               state.get("top_k", 5), state.get("doc_store"))
+        web = research_agent.search_web(state["query"], state.get("top_k", 5))
+        if docs["status"] == "error" and web["status"] == "error":
+            return {**state, "status": "error", "error_message": "No document or web evidence found",
+                    "workflow_log": workflow_log}
+        chunks = (docs.get("chunks", []) if docs["status"] == "success" else []) + web.get("chunks", [])
+        sources = (docs.get("sources", []) if docs["status"] == "success" else []) + web.get("sources", [])
+        workflow_log.append(f"[1/4] Complete - Combined {len(chunks)} evidence passages")
+        return {**state, "chunks": chunks, "sources": sources, "web_sources": web.get("web_sources", []),
+                "searched_docs": docs.get("searched_docs", []), "num_chunks_found": len(chunks),
+                "workflow_log": workflow_log, "research_complete": True, "status": "research_complete"}
 
     if use_multi_doc:
         workflow_log.append("[1/4] Research Agent: Searching multi-document store...")
